@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>vcpkg初步尝试总结 - Hexo</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="Hexo"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Hexo"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="包管理器很好，使我的c++项目旋转 c++开发经常没用包管理器，集成第三方库简直痛苦,一个库可能要小一天准备整个小项目，看到目前出名的C++ 包管理器有vcpkg(后台微软，没有官方二进制包)和canon(有二进制包)。后面选了vcpkg，因为有微软后台。当年Gentoo的教训给得不够 集成vcpkg的方式是给cmake一个vcpkg提供的假的toolchain文件，它会在里面搞事，不确定这个决定"><meta property="og:type" content="blog"><meta property="og:title" content="vcpkg初步尝试总结"><meta property="og:url" content="http://example.com/2022/04/18/about-vcpkg/"><meta property="og:site_name" content="Hexo"><meta property="og:description" content="包管理器很好，使我的c++项目旋转 c++开发经常没用包管理器，集成第三方库简直痛苦,一个库可能要小一天准备整个小项目，看到目前出名的C++ 包管理器有vcpkg(后台微软，没有官方二进制包)和canon(有二进制包)。后面选了vcpkg，因为有微软后台。当年Gentoo的教训给得不够 集成vcpkg的方式是给cmake一个vcpkg提供的假的toolchain文件，它会在里面搞事，不确定这个决定"><meta property="og:locale" content="en_US"><meta property="og:image" content="http://example.com/img/og_image.png"><meta property="article:published_time" content="2022-04-18T10:26:46.000Z"><meta property="article:modified_time" content="2022-04-18T11:09:16.278Z"><meta property="article:author" content="John Doe"><meta property="twitter:card" content="summary"><meta property="twitter:image:src" content="http://example.com/img/og_image.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2022/04/18/about-vcpkg/"},"headline":"vcpkg初步尝试总结","image":["http://example.com/img/og_image.png"],"datePublished":"2022-04-18T10:26:46.000Z","dateModified":"2022-04-18T11:09:16.278Z","author":{"@type":"Person","name":"John Doe"},"publisher":{"@type":"Organization","name":"Hexo","logo":{"@type":"ImageObject","url":"http://example.com/img/logo.svg"}},"description":"包管理器很好，使我的c++项目旋转 c++开发经常没用包管理器，集成第三方库简直痛苦,一个库可能要小一天准备整个小项目，看到目前出名的C++ 包管理器有vcpkg(后台微软，没有官方二进制包)和canon(有二进制包)。后面选了vcpkg，因为有微软后台。当年Gentoo的教训给得不够 集成vcpkg的方式是给cmake一个vcpkg提供的假的toolchain文件，它会在里面搞事，不确定这个决定"}</script><link rel="canonical" href="http://example.com/2022/04/18/about-vcpkg/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/styles/atom-one-light.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/css/justifiedGallery.min.css"><!--!--><!--!--><style>.pace{-webkit-pointer-events:none;pointer-events:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}.pace-inactive{display:none}.pace .pace-progress{background:#3273dc;position:fixed;z-index:2000;top:0;right:100%;width:100%;height:2px}</style><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!--!--><!--!--><!-- hexo injector head_end start --><script>
+  (function () {
+      function switchTab() {
+          if (!location.hash) {
+            return;
+          }
+
+          const id = '#' + CSS.escape(location.hash.substring(1));
+          const $tabMenu = document.querySelector(`.tabs a[href="${id}"]`);
+          if (!$tabMenu) {
+            return;
+          }
+
+          const $tabMenuContainer = $tabMenu.parentElement.parentElement;
+          Array.from($tabMenuContainer.children).forEach($menu => $menu.classList.remove('is-active'));
+          Array.from($tabMenuContainer.querySelectorAll('a'))
+              .map($menu => document.getElementById($menu.getAttribute("href").substring(1)))
+              .forEach($content => $content.classList.add('is-hidden'));
+
+          if ($tabMenu) {
+              $tabMenu.parentElement.classList.add('is-active');
+          }
+          const $activeTab = document.querySelector(id);
+          if ($activeTab) {
+              $activeTab.classList.remove('is-hidden');
+          }
+      }
+      switchTab();
+      window.addEventListener('hashchange', switchTab, false);
+  })();
+  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.1.1"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="Hexo" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item search" title="Search" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-9-tablet is-9-desktop is-9-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item">Posted&nbsp;<time dateTime="2022-04-18T10:26:46.000Z" title="2022/4/18 18:26:46">2022-04-18</time></span><span class="level-item">Updated&nbsp;<time dateTime="2022-04-18T11:09:16.278Z" title="2022/4/18 19:09:16">2022-04-18</time></span><span class="level-item">5 minutes read (About 816 words)</span></div></div><h1 class="title is-3 is-size-4-mobile">vcpkg初步尝试总结</h1><div class="content"><p>包管理器很好，使我的c++项目旋转</p>
+<p>c++开发经常没用包管理器，集成第三方库简直痛苦,一个库可能要小一天<br>准备整个小项目，看到目前出名的C++ 包管理器有<code>vcpkg</code>(后台微软，没有官方二进制包)和<code>canon</code>(有二进制包)。<br>后面选了<code>vcpkg</code>，因为有微软后台。<del>当年<code>Gentoo</code>的教训给得不够</del></p>
+<p>集成vcpkg的方式是给cmake一个vcpkg提供的假的toolchain文件，它会在里面搞事，不确定这个决定怎么下的，不像是深思熟虑或有很好设计后的决定,给人的感觉是</p>
+<ul>
+<li>让我试试看什么时机能集成进去</li>
+<li>咦 这里可以，那就这里吧</li>
+</ul>
+<p>因为后面的经历让我感觉这个时机不算合理，例如有个问题是编译环境不同步。不过，这也有可能是cmake没有官方支持包管理器的锅。</p>
+<h3 id="未用包管理器之前，想用一个开源第三方库"><a href="#未用包管理器之前，想用一个开源第三方库" class="headerlink" title="未用包管理器之前，想用一个开源第三方库"></a>未用包管理器之前，想用一个开源第三方库</h3><ol>
+<li>找到代码仓库</li>
+<li>看懂是怎么编译的</li>
+<li>尝试编译，解决编译错误</li>
+<li>把编译出来的二进制入库，记录编译时的git sha1</li>
+<li>生成cmake的可链接目标:<ol>
+<li>拷需要include的文件到合适的位置</li>
+<li>设置各种属性：二进制路径、include目录、预定义宏、编译&#x2F;链接参数……</li>
+</ol>
+</li>
+</ol>
+<h3 id="如果使用vcpkg"><a href="#如果使用vcpkg" class="headerlink" title="如果使用vcpkg"></a>如果使用vcpkg</h3><ol>
+<li>在一个json文件里面说我想用<code>xxx</code>这个库</li>
+<li>cmake脚本里project后find_module(<code>xxx</code> MODULE)</li>
+<li>target_link_library(target <code>xxx</code>)</li>
+</ol>
+<h3 id="怎么快速理解vcpkg"><a href="#怎么快速理解vcpkg" class="headerlink" title="怎么快速理解vcpkg"></a>怎么快速理解vcpkg</h3><ol>
+<li>执行时机：在cmake脚本执行project()之前，cmake设置编译工具链的时候</li>
+<li>做了什么：下载&#x2F;编译&#x2F;提供第三方库的cmake目标给cmake<ol>
+<li>提供的cmake目标已经设置好各种INTERFACE属性，因此不需要自己加include，define之类的，直接一句link就够了</li>
+<li>自带各第三方库的编译脚本，无须关注各种编译细节，并且可裁剪库功能</li>
+</ol>
+</li>
+</ol>
+<h3 id="基本名词"><a href="#基本名词" class="headerlink" title="基本名词"></a>基本名词</h3><ul>
+<li><code>port</code>: 一个第三方软件是一个port</li>
+<li><code>feature</code>：库的可选特性</li>
+<li><code>triplet</code>: 一个cmake文件，告诉vcpkg编译相关各种参数。有vcpkg内建支持，也有社区提供的。用文件名的basename作为名字</li>
+<li><code>buildtree</code>：vcpkg里所有第三方库的编译根目录</li>
+</ul>
+<h4 id="对于一个第三方库来说"><a href="#对于一个第三方库来说" class="headerlink" title="对于一个第三方库来说"></a>对于一个第三方库来说</h4><ul>
+<li>用<code>manifest.json</code>来描述基本信息</li>
+<li>用<code>portfile.cmake</code>等其他附属文件来告诉vcpkg怎么编译这个第三方软件</li>
+</ul>
+<h3 id="两种用法"><a href="#两种用法" class="headerlink" title="两种用法"></a>两种用法</h3><ol>
+<li>classic模式: 各项目共享一个vcpkg的编译输出</li>
+<li>manifest模式: 一个项目独享自己的vcpkg实例</li>
+</ol>
+<h3 id="较好实践"><a href="#较好实践" class="headerlink" title="较好实践"></a>较好实践</h3><ul>
+<li>把vcpkg当子仓库，使用manifest模式：避免与其他项目冲突，例如同名库的不同版本、编译参数之类的问题</li>
+<li>禁用库的默认feature：避免编入不必要的东西</li>
+<li>与cmake preset搭配：一条龙的ci服务</li>
+</ul>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><ul>
+<li>怎么自定义第三方库: 使用自己的portfile</li>
+<li>怎么改动态&#x2F;静态等各种编译参数: 用自己的triplet</li>
+</ul>
+</div><div class="article-licensing box"><div class="licensing-title"><p>vcpkg初步尝试总结</p><p><a href="http://example.com/2022/04/18/about-vcpkg/">http://example.com/2022/04/18/about-vcpkg/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>Author</h6><p>John Doe</p></div></div><div class="level-item is-narrow"><div><h6>Posted on</h6><p>2022-04-18</p></div></div><div class="level-item is-narrow"><div><h6>Updated on</h6><p>2022-04-18</p></div></div><div class="level-item is-narrow"><div><h6>Licensed under</h6><p><a class="icons" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="icon fab fa-creative-commons"></i></a><a class="icons" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="icon fab fa-creative-commons-by"></i></a><a class="icons" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="icon fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="notification is-danger">You need to set <code>install_url</code> to use ShareThis. Please set it in <code>_config.yml</code>.</div></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">Like this article? Support the author with</h3><div class="buttons is-centered"><a class="button donate" href="/" target="_blank" rel="noopener" data-type="afdian"><span class="icon is-small"><i class="fas fa-charging-station"></i></span><span>Afdian.net</span></a><a class="button donate" data-type="alipay"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>Alipay</span><span class="qrcode"><img src="/" alt="Alipay"></span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="buymeacoffee"><span class="icon is-small"><i class="fas fa-coffee"></i></span><span>Buy me a coffee</span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="patreon"><span class="icon is-small"><i class="fab fa-patreon"></i></span><span>Patreon</span></a><div class="notification is-danger">You forgot to set the <code>business</code> or <code>currency_code</code> for Paypal. Please set it in <code>_config.yml</code>.</div><a class="button donate" data-type="wechat"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>Wechat</span><span class="qrcode"><img src="/" alt="Wechat"></span></a></div></div></div><div class="card"><div class="card-content"><h3 class="title is-5">Comments</h3><div class="notification is-danger">You forgot to set the <code>shortname</code> for Disqus. Please set it in <code>_config.yml</code>.</div></div></div></div><div class="column column-left is-3-tablet is-3-desktop is-3-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/avatar.png" alt="Your name"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">Your name</p><p class="is-size-6 is-block">Your title</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>Your location</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">Post</p><a href="/archives"><p class="title">1</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">Categories</p><a href="/categories"><p class="title">0</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">Tags</p><a href="/tags"><p class="title">0</p></a></div></div></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://github.com/ppoffice" target="_blank" rel="noopener">Follow</a></div><div class="level is-mobile is-multiline"><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Github" href="https://github.com/ppoffice"><i class="fab fa-github"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Facebook" href="https://facebook.com"><i class="fab fa-facebook"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Twitter" href="https://twitter.com"><i class="fab fa-twitter"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Dribbble" href="https://dribbble.com"><i class="fab fa-dribbble"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="RSS" href="/"><i class="fas fa-rss"></i></a></div></div></div><!--!--><div class="card widget" data-type="links"><div class="card-content"><div class="menu"><h3 class="menu-label">Links</h3><ul class="menu-list"><li><a class="level is-mobile" href="https://hexo.io" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Hexo</span></span><span class="level-right"><span class="level-item tag">hexo.io</span></span></a></li><li><a class="level is-mobile" href="https://bulma.io" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Bulma</span></span><span class="level-right"><span class="level-item tag">bulma.io</span></span></a></li></ul></div></div></div><!--!--><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">Recents</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-04-18T10:26:46.000Z">2022-04-18</time></p><p class="title"><a href="/2022/04/18/about-vcpkg/">vcpkg初步尝试总结</a></p></div></article></div></div><div class="card widget" data-type="archives"><div class="card-content"><div class="menu"><h3 class="menu-label">Archives</h3><ul class="menu-list"><li><a class="level is-mobile" href="/archives/2022/04/"><span class="level-start"><span class="level-item">April 2022</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></div></div></div><!--!--><div class="card widget" data-type="subscribe-email"><div class="card-content"><div class="menu"><h3 class="menu-label">Subscribe for updates</h3><form action="https://feedburner.google.com/fb/a/mailverify" method="post" target="popupwindow" onsubmit="window.open(&#039;https://feedburner.google.com/fb/a/mailverify?uri=&#039;,&#039;popupwindow&#039;,&#039;scrollbars=yes,width=550,height=520&#039;);return true"><input type="hidden" value="" name="uri"><input type="hidden" name="loc" value="en_US"><div class="field has-addons"><div class="control has-icons-left is-expanded"><input class="input" name="email" type="email" placeholder="Email"><span class="icon is-small is-left"><i class="fas fa-envelope"></i></span></div><div class="control"><input class="button" type="submit" value="Subscribe"></div></div></form></div></div></div><div class="card widget"><div class="card-content"><div class="notification is-danger">You need to set <code>client_id</code> and <code>slot_id</code> to show this AD unit. Please set it in <code>_config.yml</code>.</div></div></div><div class="card widget" data-type="subscribe-email"><div class="card-content"><div class="menu"><h3 class="menu-label">follow.it</h3><form action="" method="post" target="_blank"><div class="field has-addons"><div class="control has-icons-left is-expanded"><input class="input" name="email" type="email" placeholder="Email"><span class="icon is-small is-left"><i class="fas fa-envelope"></i></span></div><div class="control"><input class="button" type="submit" value="Subscribe"></div></div></form></div></div></div></div><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="Hexo" height="28"></a><p class="is-size-7"><span>&copy; 2022 John Doe</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p><p class="is-size-7">© 2019</p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("en");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="Back to top" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "This website uses cookies to improve your experience.",
+          dismiss: "Got it!",
+          allow: "Allow cookies",
+          deny: "Decline",
+          link: "Learn more",
+          policy: "Cookie Policy",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="Type something..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"Type something...","untitled":"(Untitled)","posts":"Posts","pages":"Pages","categories":"Categories","tags":"Tags"});
+        });</script></body></html>
