@@ -70,7 +70,7 @@
 </ul>
 </li>
 </ul>
-</div></article></div><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item">Posted&nbsp;<time dateTime="2023-06-08T11:30:09.000Z" title="2023/6/8 19:30:09">2023-06-08</time></span><span class="level-item">Updated&nbsp;<time dateTime="2022-04-18T11:09:16.279Z" title="2022/4/18 19:09:16">2022-04-18</time></span><span class="level-item">3 minutes read (About 413 words)</span></div></div><p class="title is-3 is-size-4-mobile"><a class="link-muted" href="/2023/06/08/try-global-pch/">试试全局pch</a></p><div class="content"><table>
+</div></article></div><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item">Posted&nbsp;<time dateTime="2023-06-08T11:30:09.000Z" title="2023/6/8 19:30:09">2023-06-08</time></span><span class="level-item">Updated&nbsp;<time dateTime="2024-02-29T05:23:33.916Z" title="2024/2/29 13:23:33">2024-02-29</time></span><span class="level-item">3 minutes read (About 413 words)</span></div></div><p class="title is-3 is-size-4-mobile"><a class="link-muted" href="/2023/06/08/try-global-pch/">试试全局pch</a></p><div class="content"><table>
 <thead>
 <tr>
 <th align="center">pch使用方式</th>
@@ -111,7 +111,7 @@
 </li>
 </ul>
 <p>我选择了放进去，毕竟链接器就是要干筛选的活儿，我相信它</p>
-<p>最终喜闻乐见，编译debug从<del>14s下降到</del>10s，可喜可贺。目前还有报gpch的obj重复了的警告，一时没看出怎么解决，不过暂时不管它了</p>
+<p>最终喜闻乐见，编译debug从~14s下降到~10s，可喜可贺。目前还有报gpch的obj重复了的警告，一时没看出怎么解决，不过暂时不管它了</p>
 </div></article></div><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item">Posted&nbsp;<time dateTime="2023-06-07T06:26:46.000Z" title="2023/6/7 14:26:46">2023-06-07</time></span><span class="level-item">Updated&nbsp;<time dateTime="2022-04-18T11:09:16.280Z" title="2022/4/18 19:09:16">2022-04-18</time></span><span class="level-item">3 minutes read (About 450 words)</span></div></div><p class="title is-3 is-size-4-mobile"><a class="link-muted" href="/2023/06/07/trying-c++-modules/">C++ Modules 尝试</a></p><div class="content"><h2 id="TL-DR：让子弹再飞一会儿，等一个C-23"><a href="#TL-DR：让子弹再飞一会儿，等一个C-23" class="headerlink" title="TL;DR：让子弹再飞一会儿，等一个C++23"></a>TL;DR：让子弹再飞一会儿，等一个C++23</h2><p>折腾了两天，普通<code>modules</code>、<code>header unit</code>、<code>standard library modules</code>都折腾了下，到处翻文档、看blog，遇到编译器报错还好，能猜一下也能谷歌。遇到编译器崩溃就懵，只能一点点干掉代码排除</p>
 <ul>
 <li>新版cmake支持尚未完全但勉强能用，vs虽然说自己支持了但还有不少的bug，如<ul>
